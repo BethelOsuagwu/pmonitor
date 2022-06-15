@@ -1,0 +1,6 @@
+/.keys
+/docs
+/__pycache__
+*.slx
+*.slxc
+*.slx.autosave
