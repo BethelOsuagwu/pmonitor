@@ -14,7 +14,7 @@ class TissueFixed(Tissue):
         
         reliefTimeThreshold : float
             The relief time threshold in seconds which determines how long a 
-            relief period is required before pressure relieve can accur.
+            relief period is required to last before pressure relief can accur.
         
         References: 
             \cite{temes1977pressure} Temes, W.C. and Harder, P., 1977. Pressure relief training device. Physical therapy, 57(10), pp.1152-1153. doi:10.1093/ptj/57.10.1152
