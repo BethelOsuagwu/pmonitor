@@ -16,21 +16,18 @@ from pmonitor.inc.Helpers import Helpers;
 # EXPERIMENTATION - Test responses given an impulse input
 # Initialise
 dt=0.1; # Sampling time
-linear_relief_time=28*24*60*60;#for 28 days
-linear_beta=Helpers.linearBeta(linear_relief_time,dt); # Determine linear beta 
-
-relief_time=5*60;#for 5 minutes for exponential relief time
-beta=Helpers.beta(relief_time,dt); # Determine exponential beta 
+linear_beta=Helpers.linearBeta(28*24*60*60,dt); # Determine linear beta for 28 days
+beta=Helpers.beta(5*60,dt); # Determine beta for 5 minutes
 ptt=PressureTimeThreshold(); # Define pressure time injury threshold
 ee=EffectEstimator(); # Define effect estimator
 
 flen=round(5*60/dt); # Determine the averaging filter length for 5 minutes
 
-fixed_relief_time=60;# the relief time for the fixed tissue.
+
 
 # Create tissues
 tissues=[];
-tissueFixed=TissueFixed('default',ptt,ee,reliefTimeThreshold=fixed_relief_time);
+tissueFixed=TissueFixed('default',ptt,ee);
 tissueInverse=TissueInverse('default',ptt,ee);
 tissueContinuous=TissueContinuous('default',ptt,ee,beta,beta,beta);
 tissueLinear=TissueLinear('default',ptt,ee,linear_beta,linear_beta,linear_beta);
@@ -77,7 +74,7 @@ for n in range(0,nsteps):
 
 
 
-# Plot results
+# Plot results together
 ## Apply some scalling
 data_tissue_fixed_h=np.array(data_tissue_fixed_h)*1000000;
 data_tissue_inverse_h=np.array(data_tissue_inverse_h)*1000000;
@@ -87,22 +84,32 @@ data_tissue_avg_h=np.array(data_tissue_avg_h)*1000000000;
 
 plt.rcParams.update({'font.size': 13})
 
+
+fig,ax1=plt.subplots();
 t=np.array([x for x in range(nsteps)],np.float)*dt
+lines1=ax1.plot(t,data_tissue_fixed_h,'--')
+lines2=ax1.plot(t,data_tissue_inverse_h,'-.')
+lines3=ax1.plot(t,data_tissue_continuous_h,':')
+lines4=ax1.plot(t,data_tissue_avg_h,'-')
+lines5=ax1.plot(t,data_tissue_linear_h,':')
 
-#-----------------------------------------------------------
-# Plot results on separately................................
+ax1.set_ylabel('Effect * s (x $10^{-6}$)')
+ax1.set_xlabel('Time (s)')
 
-title='Impulse response'
-xlabel='Time (s)'
-ylabel='Effect * s (x $10^{-6}$)';
-annotations={'avg':'Average $x10^{-3}$ - L='+str(flen),
-             'linear':'Linear - RT='+str(linear_relief_time) +'s',
-             'continuous':'Exp - RT='+ str(relief_time) +'s'
-             };
-file_name='img/separate/impulse_response_compare_separate.pdf'
 
-from pmonitor.inc.Analysis import plot_separate;
-plot_separate(t,Ps,data_tissue_avg_h,data_tissue_fixed_h,data_tissue_inverse_h,data_tissue_continuous_h,data_tissue_linear_h,
-              title,xlabel,ylabel,file_name,annotations)
+color = '#000000';
+color_fainted='#666666';
+color_alpha=0.1;
+ax2=ax1.twinx();
+lines0=ax2.plot(t,Ps,'-',color=color,alpha=color_alpha)
+ax2.set_ylabel('Pressure (kPa)',color=color_fainted)
+ax2.tick_params(axis='y', labelcolor=color_fainted)
+
+
+plt.legend(lines0+lines1+lines2+lines3+lines4+lines5,['Pressure','TissueFixed','TissueInverse','TissueContinuous','Averaging $x10^{-3}$','Linear'],loc=0);
+
+
+plt.title('Impulse response')
+plt.savefig('img/impulse_response_compare.pdf');
 
 
